@@ -220,7 +220,11 @@ class Vector(object):
     def dist_squared(self, other):
         """Compute euclidean distance between points given by self
         and 'other'."""
-        return (self - other).length_squared
+        if type(other) == Vector:
+            sub = np.subtract(self._data, other._data)
+            return np.dot(sub, sub)
+        else:
+            return NotImplemented
 
     def get_cross_operator(self):
         """Return the cross product operator for this Vector. I.e. the
