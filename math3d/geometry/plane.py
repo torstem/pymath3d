@@ -33,6 +33,8 @@ class Plane(object):
         * 'points': A set of at least three points for fitting a
         plane.
 
+        * 'coeffs': Four coefficients for the plane equation ax+by+cz+d=0.
+
         The internal representation is point and normal. If given as a
         pn_pair, A boolean, 'origo_inside', is held to decide the
         direction of the normal vector, such that the origo of the
@@ -51,6 +53,8 @@ class Plane(object):
             self._p = (self._p * self._n) * self._n
         elif 'points' in kwargs:
             self.fit_plane(kwargs['points'])
+        elif 'coeffs' in kwargs:
+            self.coeffs = kwargs['coeffs']
         else:
             raise Exception(
                 'Plane.__init__ : Must have either of constructor ' +
@@ -78,13 +82,13 @@ class Plane(object):
         normal vector direction."""
         return (m3d.Vector(p) - self._p) * self._n
 
-    @property
-    def plane_vector(self):
+    def get_plane_vector(self):
         return self.pn_to_pv(self._p, self._n)
 
-    @plane_vector.setter
-    def plane_vector(self, pv):
+    def set_plane_vector(self, pv):
         (self._p, self._n) = self.pv_to_pn(pv)
+
+    plane_vector = property(get_plane_vector, set_plane_vector)
 
     @property
     def point_normal(self):
@@ -97,6 +101,20 @@ class Plane(object):
     @property
     def normal(self):
         return self._n
+
+    def get_coeffs(self):
+        """Return the four coefficients of the plane."""
+        return list(self._n) + [self.dist([0,0,0])]
+
+    def set_coeffs(self, coeffs):
+        """Set the plane to the one given by the four coefficients."""
+        self.plane_vector = m3d.Vector(coeffs[:3]) / -coeffs[3]
+        # if not len(coeffs) == 4:
+        #     raise Exception('Plane needs four coefficients!')
+        # self._n = m3d.Vector(coeffs[:3]).normalized
+        # self._p = -coeffs[3] * self._n
+
+    coeffs = property(get_coeffs, set_coeffs)
 
     def fit_plane(self, points):
         """Compute the plane vector from a set of points. 'points'
@@ -134,11 +152,38 @@ class Plane(object):
             n = -n
         return (p, n)
 
+    def projection(self, point):
+        """Return the projection of the 'point' on the plane."""
+        if type(point) != m3d.Vector:
+            point = m3d.Vector(point)
+        return point - self._n * (point - self._p) * self._n
+
     def line_intersection(self, line):
         """Compute the intersection with the given line."""
         if type(line) != m3d.geometry.Line:
             raise Exception(
                 'Method only implemented for math3d.geometry.Line object')
         (lp, ld) = line._p, line._d
-        dist = (self._p - lp) * self._n / self._n * ld
-        return dist * ld + lp
+        ndd = self._n * ld
+        if np.abs(ndd) < m3d.utils._eps:
+            return None
+        else:
+            dist = (self._p - lp) * self._n / ndd
+            return dist * ld + lp
+
+    def plane_intersection(self, other):
+        """Find the line of intersection with 'other' plane. Method found in
+        http://paulbourke.net/geometry/pointlineplane/
+        """
+        ld = self._n.cross(other._n)
+        if ld.length < m3d.utils._eps:
+            return None
+        ld.normalize()
+        ndot = self._n * other._n
+        det = 1 - ndot ** 2
+        ds = self.coeffs[3]
+        do = other.coeffs[3]
+        cs = (ds - do * ndot) / det
+        co = (do - ds * ndot) / det
+        lp = cs * self._n + co * other._n
+        return m3d.geometry.Line(point_direction=(lp, ld))
