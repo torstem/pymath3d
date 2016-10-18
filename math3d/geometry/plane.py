@@ -33,12 +33,14 @@ class Plane(object):
         * 'points': A set of at least three points for fitting a
         plane.
 
-        * 'coeffs': Four coefficients for the plane equation ax+by+cz+d=0.
+        * 'coeffs': Four coefficients (a,b,c,d) for the plane equation
+          ax+by+cz+d=0.
 
         The internal representation is point and normal. If given as a
         pn_pair, A boolean, 'origo_inside', is held to decide the
         direction of the normal vector, such that the origo of the
-        defining coordinate system is on the inside when true."""
+        defining coordinate system is on the inside when true.
+        """
 
         self._origo_inside = kwargs.get('origo_inside', True)
         if 'plane_vector' in kwargs:
@@ -158,12 +160,12 @@ class Plane(object):
             point = m3d.Vector(point)
         return point - self._n * (point - self._p) * self._n
 
-    def line_intersection(self, line):
+    def line_intersection(self, other):
         """Compute the intersection with the given line."""
-        if type(line) != m3d.geometry.Line:
+        if type(other) != m3d.geometry.Line:
             raise Exception(
                 'Method only implemented for math3d.geometry.Line object')
-        (lp, ld) = line._p, line._d
+        (lp, ld) = other._p, other._d
         ndd = self._n * ld
         if np.abs(ndd) < m3d.utils._eps:
             return None
@@ -175,15 +177,24 @@ class Plane(object):
         """Find the line of intersection with 'other' plane. Method found in
         http://paulbourke.net/geometry/pointlineplane/
         """
+        if type(other) != Plane:
+            raise Exception(
+                'Method only implemented for math3d.geometry.Plane object')
         ld = self._n.cross(other._n)
         if ld.length < m3d.utils._eps:
             return None
         ld.normalize()
         ndot = self._n * other._n
         det = 1 - ndot ** 2
-        ds = self.coeffs[3]
-        do = other.coeffs[3]
+        ds = -self.coeffs[3]
+        do = -other.coeffs[3]
         cs = (ds - do * ndot) / det
         co = (do - ds * ndot) / det
         lp = cs * self._n + co * other._n
         return m3d.geometry.Line(point_direction=(lp, ld))
+
+
+def _test():
+    l = Plane(plane_vector=(1,0,0)).plane_intersection(Plane(plane_vector=(0,1,0)))
+    assert(l.point.x == 1 and l.point.y == 1)
+    assert(np.abs(l.direction * m3d.Vector.ez) == 1)
