@@ -106,7 +106,7 @@ class Plane(object):
 
     def get_coeffs(self):
         """Return the four coefficients of the plane."""
-        return list(self._n) + [self.dist([0,0,0])]
+        return list(self._n) + [self.dist([0, 0, 0])]
 
     def set_coeffs(self, coeffs):
         """Set the plane to the one given by the four coefficients."""
@@ -122,21 +122,23 @@ class Plane(object):
         """Compute the plane vector from a set of points. 'points'
         must be an array of row position vectors, such that
         points[i] is a position vector."""
+        points = np.array(points)
         centre = np.sum(points, axis=0)/len(points)
         eigen = np.linalg.eig(np.cov(points.T))
         min_ev_i = np.where(eigen[0] == min(eigen[0]))[0][0]
         normal = eigen[1].T[min_ev_i]
         (self._p, self._n) = (m3d.Vector(centre), m3d.Vector(normal))
 
-    def pn_to_pv(self, p, n):
+    @classmethod
+    def pn_to_pv(cls, point, normal):
         """Compute the plane vector of a plane represented by a point
         and normal."""
-        if type(p) != m3d.Vector:
-            p = m3d.Vector(p)
-        if type(n) != m3d.Vector:
-            n = m3d.Vector(n)
+        if not isinstance(point, m3d.Vector):
+            point = m3d.Vector(point)
+        if not isinstance(normal, m3d.Vector):
+            normal = m3d.Vector(normal)
         # // Origo projection on plane
-        p0 = (p * n) * n
+        p0 = (point * normal) * normal
         # // Square of offset from origo
         d2 = p0.length_squared
         # // return the plane vector
@@ -145,7 +147,7 @@ class Plane(object):
     def pv_to_pn(self, pv):
         """Calculate a point-normal representation of the plane
         described by the given plane vector."""
-        if type(pv) != m3d.Vector:
+        if isinstance(pv, m3d.Vector):
             pv = m3d.Vector(pv)
         d = pv.length
         n = pv / pv.length
@@ -156,7 +158,7 @@ class Plane(object):
 
     def projection(self, point):
         """Return the projection of the 'point' on the plane."""
-        if type(point) != m3d.Vector:
+        if isinstance(point, m3d.Vector):
             point = m3d.Vector(point)
         return point - self._n * (point - self._p) * self._n
 
@@ -177,7 +179,7 @@ class Plane(object):
         """Find the line of intersection with 'other' plane. Method found in
         http://paulbourke.net/geometry/pointlineplane/
         """
-        if type(other) != Plane:
+        if not isinstance(other, Plane):
             raise Exception(
                 'Method only implemented for math3d.geometry.Plane object')
         ld = self._n.cross(other._n)
@@ -193,8 +195,31 @@ class Plane(object):
         lp = cs * self._n + co * other._n
         return m3d.geometry.Line(point_direction=(lp, ld))
 
+    def intersection(self, other):
+        """Polymorphic intersection method."""
+        if isinstance(other, Plane):
+            return self.plane_intersection(other)
+        elif isinstance(other, m3d.geometry.Line):
+            return self.line_intersection(other)
+        else:
+            raise NotImplementedError('Can not compute intersection with ' +
+                                      'object of type {}'.format(type(other)))
+
 
 def _test():
-    l = Plane(plane_vector=(1,0,0)).plane_intersection(Plane(plane_vector=(0,1,0)))
-    assert(l.point.x == 1 and l.point.y == 1)
-    assert(np.abs(l.direction * m3d.Vector.ez) == 1)
+    # Test creation on points
+    pln = Plane(points=((1,0,0), (0,1,0), (0,0,1)))
+    assert np.abs(pln.normal * m3d.Vector(1,1,1).normalized) - 1 < m3d.utils._eps 
+    pln0 = Plane(plane_vector=(1, 0, 0))
+    pln1 = Plane(plane_vector=(0, 1, 0))
+    # Test for intersection between planes
+    line = pln0.intersection(pln1)
+    assert line.point.x == 1 and line.point.y == 1
+    assert np.abs(line.direction * m3d.Vector.ez) == 1
+    # Test for intersection with unsupported object
+    try:
+        pln0.intersection(m3d.Vector.ex)
+    except NotImplementedError as nie:
+        print('Caught expected exception from intersection of plane ' +
+              'with vector. "{}"'.format(str(nie)))
+    
