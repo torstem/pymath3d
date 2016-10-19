@@ -30,7 +30,9 @@ def _deprecation_warning(msg):
 # Limit for accuracy of consistencies and comparison.
 _eps32 = np.finfo(np.float32).resolution
 _eps64 = np.finfo(np.float64).resolution
-_eps = _eps32
+eps = _eps32
+# Backwards compatibility
+_eps = eps
 
 # # Tuple of types considered sequences
 # _seq_types = (list, tuple, np.ndarray)

@@ -208,8 +208,9 @@ class Plane(object):
 
 def _test():
     # Test creation on points
-    pln = Plane(points=((1,0,0), (0,1,0), (0,0,1)))
-    assert np.abs(pln.normal * m3d.Vector(1,1,1).normalized) - 1 < m3d.utils._eps 
+    pln = Plane(points=((1, 0, 0), (0, 1, 0), (0, 0, 1)))
+    assert (np.abs(pln.normal * m3d.Vector(1, 1, 1).normalized) - 1
+            < m3d.utils.eps)
     pln0 = Plane(plane_vector=(1, 0, 0))
     pln1 = Plane(plane_vector=(0, 1, 0))
     # Test for intersection between planes
@@ -222,4 +223,3 @@ def _test():
     except NotImplementedError as nie:
         print('Caught expected exception from intersection of plane ' +
               'with vector. "{}"'.format(str(nie)))
-    
