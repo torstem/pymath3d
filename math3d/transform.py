@@ -204,6 +204,15 @@ class Transform(object):
         self._v = origo
         self._from_ov(self._o, self._v)
 
+    def from_yzp(self, vec_y, vec_z, origo):
+        """Make this transform correspond to the orientation given by the
+        given 'vec_y' and 'vec_z' directions and translation given by
+        'p'.
+        """
+        self._o.from_yz(vec_y, vec_z)
+        self._v = origo
+        self._from_ov(self._o, self._v)
+
     def dist_squared(self, other):
         """Return the square of the metric distance, as the unweighted sum of
         linear and angular distance, to the 'other' transform. Note
@@ -322,12 +331,24 @@ class Transform(object):
         t.from_xzp(vec_x, vec_z, origo)
         return t
 
+    @classmethod
+    def new_from_yzp(self, vec_y, vec_z, origo):
+        """Create a transform corresponding to the orientation given by the
+        given 'vec_y' and 'vec_z' directions and translation given by
+        'origo'.
+        """
+        t = Transform()
+        t.from_yzp(vec_y, vec_z, origo)
+        return t
+
 
 def _test():
+    cy = Vector(1,1,0)
     cx = Vector(2, 3, 0)
     cz = Vector.e2
     p = Vector(1, 2, 3)
     t = Transform.new_from_xzp(cx, cz, p)
+    t = Transform.new_from_yzp(cy, cz, p)
     print(t*cx)
     it = t.inverse
     print(t*it)

@@ -198,7 +198,7 @@ class Orientation(object):
             y_vec = m3d.Vector(y_vec)
         x_vec = x_vec.normalized
         y_vec = y_vec.normalized
-        if x_vec * y_vec > utils._eps:
+        if np.abs(x_vec * y_vec) > utils.eps:
             print('Warning: Orthonormalizing y_vec on x_vec!')
             y_vec -= (x_vec * y_vec) * x_vec
             y_vec.normalize()
@@ -216,12 +216,30 @@ class Orientation(object):
             z_vec = m3d.Vector(z_vec)
         x_vec = x_vec.normalized
         z_vec = z_vec.normalized
-        if x_vec * z_vec > utils._eps:
+        if np.abs(x_vec * z_vec) > utils.eps:
             print('Warning: Orthonormalizing z_vec on x_vec!')
             z_vec -= (x_vec * z_vec) * x_vec
             z_vec.normalize()
         self._data[:, 0] = x_vec._data
         self._data[:, 1] = z_vec.cross(x_vec)._data
+        self._data[:, 2] = z_vec._data
+
+    def from_yz(self, y_vec, z_vec):
+        """Reset this orientation to the one that conforms with the
+        given x and z directions.
+        """
+        if type(y_vec) != m3d.Vector:
+            y_vec = m3d.Vector(y_vec)
+        if type(z_vec) != m3d.Vector:
+            z_vec = m3d.Vector(z_vec)
+        y_vec = y_vec.normalized
+        z_vec = z_vec.normalized
+        if np.abs(y_vec * z_vec) > utils.eps:
+            print('Warning: Orthonormalizing z_vec on x_vec!')
+            z_vec -= (y_vec * z_vec) * y_vec
+            z_vec.normalize()
+        self._data[:, 0] = y_vec.cross(z_vec)._data
+        self._data[:, 1] = y_vec._data
         self._data[:, 2] = z_vec._data
 
     def get_quaternion(self):
@@ -478,6 +496,15 @@ class Orientation(object):
         """
         o = Orientation()
         o.from_xz(x_vector, z_vector)
+        return o
+
+    @classmethod
+    def new_from_yz(cls, y_vector, z_vector):
+        """Factory for a new orientation with given y- and
+        z-direction.
+        """
+        o = Orientation()
+        o.from_yz(y_vector, z_vector)
         return o
 
     @classmethod
