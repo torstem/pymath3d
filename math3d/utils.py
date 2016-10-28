@@ -27,16 +27,23 @@ def _deprecation_warning(msg):
           .format(f[1], f[2], f[3]) +
           'Suggestion for replacement: "{:s}"'.format(msg))
 
-# Limit for accuracy of consistencies and comparison.
-_eps32 = np.finfo(np.float32).resolution
-_eps64 = np.finfo(np.float64).resolution
-eps = _eps32
-# Backwards compatibility
-_eps = eps
 
-# # Tuple of types considered sequences
-# _seq_types = (list, tuple, np.ndarray)
+def set_precision(prec):
+    """Set epsilon and float type"""
+    global eps, _eps, flt
+    if prec == 16:
+        eps = 10 * np.finfo(np.float16).resolution
+        flt = np.float16
+    elif prec == 32:
+        eps = 10 * np.finfo(np.float32).resolution
+        flt = np.float32
+    elif prec == 64:
+        eps = 10 * np.finfo(np.float64).resolution
+        flt = np.float64
+    else:
+        raise Error('Supported precision (int): 16, 32, 64.')
 
+set_precision(64)
 
 def is_sequence(obj):
     """Test if "obj" is a sequence."""

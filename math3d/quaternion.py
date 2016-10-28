@@ -46,7 +46,7 @@ class UnitQuaternion(object):
         tacitly.
         """
         norm_warn = kwargs.get('norm_warn', True)
-        self._s = 1.0
+        self._s = utils.flt(1.0)
         self._v = Vector()
         if len(args) == 0:
             # Default constructor
@@ -75,7 +75,7 @@ class UnitQuaternion(object):
             # Test for (axis, angle) and (s, v) determined by order
             if utils.is_num_type(args[0]) and type(args[1]) == Vector:
                 # Interpret as s, v
-                self._s = args[0]
+                self._s = utils.flt(args[0])
                 self._v = args[1].copy()
             elif utils.is_num_type(args[1]) and type(args[0]) == Vector:
                 # Interpret as axis-angle
@@ -91,13 +91,13 @@ class UnitQuaternion(object):
             self.rotation_vector = Vector(args)
         elif len(args) == 4 and np.all(np.isreal(args)):
             # Assume numbers for s, x, y, and z
-            self._s = args[0]
+            self._s = utils.flt(args[0])
             self._v = Vector(args[1:])
         else:
             raise utils.Error(
                 'Creating on type {} is not supported'
                 .format(str(type(args))))
-        if np.abs(self.norm - 1.0) > utils._eps:
+        if np.abs(self.norm - 1.0) > utils.eps:
             if norm_warn:
                 print(('UnitQuaternion.__init__ : Warning : Arguments '
                        'did not constitute a unit quaternion ' +
@@ -198,7 +198,7 @@ class UnitQuaternion(object):
         """In-place exponentiation of this quaternion to the power of
         'x'."""
         if abs(1 - abs(self._s)) < 1e-7:
-            self._s = 1
+            self._s = utils.flt(1)
             self._v = Vector(0, 0, 0)
         else:
             theta = np.arccos(self._s)
@@ -271,6 +271,7 @@ class UnitQuaternion(object):
         axis, angle = axisangle
         if type(axis) != Vector:
             axis = Vector(axis)
+        angle = utils.flt(angle)
         sa = np.sin(0.5 * angle)
         ca = np.cos(0.5 * angle)
         axis.normalize()
@@ -294,7 +295,7 @@ class UnitQuaternion(object):
         if type(rot_vec) != Vector:
             rot_vec = Vector(rot_vec)
         angle = rot_vec.length
-        if angle > utils._eps:
+        if angle > utils.eps:
             axis = rot_vec.normalized
         else:
             # Select arbitrary x-direction as axis and set angle to zero
@@ -349,11 +350,11 @@ class UnitQuaternion(object):
             w = (v + 1) % 3
             r = np.sqrt(1 + M[u, u] - M[v, v] - M[w, w])
             if abs(r) < 1e-10:
-                self._s = 1.0
+                self._s = utils.flt(1.0)
                 self._v = Vector(0, 0, 0)
             else:
                 tworinv = 1.0 / (2 * r)
-                self._s = (M[w, v] - M[v, w]) * tworinv
+                self._s = util.flt((M[w, v] - M[v, w]) * tworinv)
                 self._v[u] = 0.5 * r
                 self._v[v] = (M[u, v] + M[v, u]) * tworinv
                 self._v[w] = (M[w, u] + M[u, w]) * tworinv
@@ -393,7 +394,7 @@ class UnitQuaternion(object):
         """Normalize this quaternion. """
         n = self.norm
         if abs(n) < 1e-10:
-            self._s = 1
+            self._s = util.flt(1)
             self._v = Vector(0.0, 0.0, 0.0)
         else:
             ninv = 1.0 / n

@@ -16,6 +16,7 @@ import numpy as np
 
 from ..orientation import Orientation
 from ..quaternion import UnitQuaternion
+from .. import utils
 
 
 class SO3Interpolation(object):
@@ -51,7 +52,7 @@ class SO3Interpolation(object):
     def quat(self, time, checkrange=True):
         """Return the quaternion in the slerp at 'time'; in [0,1]."""
         if checkrange:
-            time = np.float64(time)
+            time = utils.flt(time)
             if time < 0.0 or time > 1.0:
                 raise self.Error('"time" must be number in [0.0 ; 1.0]. ' +
                                  'I was {}'.format(time))

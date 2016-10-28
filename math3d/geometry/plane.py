@@ -16,6 +16,8 @@ __status__ = "Development"
 import math3d as m3d
 import numpy as np
 
+from .. import utils
+
 
 class Plane(object):
     def __init__(self, **kwargs):
@@ -169,7 +171,7 @@ class Plane(object):
                 'Method only implemented for math3d.geometry.Line object')
         (lp, ld) = other._p, other._d
         ndd = self._n * ld
-        if np.abs(ndd) < m3d.utils._eps:
+        if np.abs(ndd) < utils.eps:
             return None
         else:
             dist = (self._p - lp) * self._n / ndd
@@ -183,7 +185,7 @@ class Plane(object):
             raise Exception(
                 'Method only implemented for math3d.geometry.Plane object')
         ld = self._n.cross(other._n)
-        if ld.length < m3d.utils._eps:
+        if ld.length < utils.eps:
             return None
         ld.normalize()
         ndot = self._n * other._n
@@ -210,7 +212,7 @@ def _test():
     # Test creation on points
     pln = Plane(points=((1, 0, 0), (0, 1, 0), (0, 0, 1)))
     assert (np.abs(pln.normal * m3d.Vector(1, 1, 1).normalized) - 1
-            < m3d.utils.eps)
+            < utils.eps)
     pln0 = Plane(plane_vector=(1, 0, 0))
     pln1 = Plane(plane_vector=(0, 1, 0))
     # Test for intersection between planes

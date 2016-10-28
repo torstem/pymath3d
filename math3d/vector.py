@@ -42,17 +42,17 @@ class Vector(object):
         represented as a position vector. Otherwise it is represented
         as a free vector."""
         if len(args) == 0:
-            self._data = np.array([0, 0, 0], dtype=np.float64)
+            self._data = np.array([0, 0, 0], dtype=utils.flt)
         elif len(args) == 3 and utils.is_num_types(args):
-            self._data = np.array(args, dtype=np.float64)
+            self._data = np.array(args, dtype=utils.flt)
         elif len(args) == 2 and utils.is_num_types(args):
-            self._data = np.array((args[0], args[1], 0), dtype=np.float64)
+            self._data = np.array((args[0], args[1], 0), dtype=utils.flt)
         elif len(args) == 1:
             arg = args[0]
             if utils.is_three_sequence(arg):
-                self._data = np.array(arg, dtype=np.float64)
+                self._data = np.array(arg, dtype=utils.flt)
             elif utils.is_sequence(arg) and len(arg) == 2:
-                self._data = np.array((arg[0], arg[1], 0), dtype=np.float64)
+                self._data = np.array((arg[0], arg[1], 0), dtype=utils.flt)
             elif type(arg) == Vector:
                 self._data = arg.array
             else:
@@ -126,7 +126,7 @@ class Vector(object):
 
     def __eq__(self, other):
         if type(other) == Vector:
-            return np.sum((self._data-other._data)**2) < utils._eps
+            return np.sum((self._data - other._data) ** 2) < utils.eps
         else:
             return NotImplemented
 
@@ -433,9 +433,9 @@ def _test_projection():
     v0 = Vector([1, 1, 3])
     v1 = Vector([1, 1, 0])
     v0prj = v0.projection(v1)
-    if (v0prj - v1).length > utils._eps64:
+    if (v0prj - v1).length > utils.eps:
         return False
     v0prj = v0.projection(v1.normalized, normalize=False)
-    if (v0prj - v1).length > utils._eps64:
+    if (v0prj - v1).length > utils.eps:
         return False
     return True

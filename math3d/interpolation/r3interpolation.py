@@ -15,7 +15,7 @@ __status__ = "Production"
 import numpy as np
 
 from ..vector import Vector
-
+from .. import utils
 
 class R3Interpolation(object):
     """Simple linear position interpolation in R^3."""
@@ -45,7 +45,7 @@ class R3Interpolation(object):
     def pos(self, time, checkrange=True):
         """Called to get the interpolated position at 'time'."""
         if checkrange:
-            time = np.float64(time)
+            time = utils.flt(time)
             if time < 0.0 or time > 1.0:
                 raise self.Error('"time" must be number in [0.0 ; 1.0]. ' +
                                  'It was {}.'.format(time))

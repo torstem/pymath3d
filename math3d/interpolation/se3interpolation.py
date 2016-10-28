@@ -15,9 +15,9 @@ __status__ = "Production"
 import numpy as np
 
 from ..transform import Transform
+from .. import utils
 from .so3interpolation import SO3Interpolation
 from .r3interpolation import R3Interpolation
-
 
 class SE3Interpolation(SO3Interpolation, R3Interpolation):
     """A class for object representing a linear interpolation in task
@@ -49,7 +49,7 @@ class SE3Interpolation(SO3Interpolation, R3Interpolation):
         """Class callable method for giving the transform at time
         'time'; in [0,1]."""
         if checkrange:
-            time = np.float64(time)
+            time = utils.flt(time)
             if time < 0.0 or time > 1.0:
                 raise self.Error('"time" must be number in [0.0 ; 1.0]. ' +
                                  'It was {}.'.format(time))

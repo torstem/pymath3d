@@ -92,8 +92,8 @@ class Orientation(object):
             self._data = np.transpose(np.vstack((va for va in array_args)))
         elif len(args) == 0:
             self._data = np.identity(3)
-        # Always ensure that we use float64 as fundamental type
-        self._data = self._data.astype(np.float64)
+        # Always ensure that we use utils.flt as fundamental type
+        self._data = self._data.astype(utils.flt)
 
     def __copy__(self):
         """Copy method for creating a copy of this Orientation."""
@@ -163,7 +163,7 @@ class Orientation(object):
 
     def __eq__(self, other):
         if type(other) == Orientation:
-            return np.sum((self._data-other._data)**2) < utils._eps
+            return np.sum((self._data-other._data)**2) < utils.eps
         else:
             return NotImplemented
             # raise utils.Error('Could not compare to non-Orientation!')
@@ -267,7 +267,7 @@ class Orientation(object):
         if type(rot_vec) == Vector:
             rot_vec = rot_vec.array
         angle = np.linalg.norm(rot_vec)
-        if np.abs(angle) < utils._eps:
+        if np.abs(angle) < utils.eps:
             self._data = np.identity(3)
         else:
             axis = rot_vec / angle
@@ -635,7 +635,7 @@ class Orientation(object):
         m = self._data
         if repetition:
             sy = np.sqrt(m[i, j]**2 + m[i, k]**2)
-            if sy > 16 * np.finfo(np.float32).eps:
+            if sy > utils.eps:
                 ax = np.arctan2(m[i, j], m[i, k])
                 ay = np.arctan2(sy, m[i, i])
                 az = np.arctan2(m[j, i], -m[k, i])
@@ -645,7 +645,7 @@ class Orientation(object):
                 az = 0.0
         else:  # not repetition
             cy = np.sqrt(m[i, i]**2 + m[j, i]**2)
-            if cy > 16 * np.finfo(np.float32).eps:
+            if cy > utils.eps:
                 ax = np.arctan2(m[k, j], m[k, k])
                 ay = np.arctan2(-m[k, i], cy)
                 az = np.arctan2(m[j, i], m[i, i])

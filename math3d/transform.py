@@ -113,7 +113,7 @@ class Transform(object):
         self._from_ov(self._o, self._v)
 
     def _from_ov(self, o, v):
-        self._data = np.identity(4, dtype=np.float64)
+        self._data = np.identity(4, dtype=utils.flt)
         # First take over the data from Orientation and Vector
         self._data[:3, :3] = o._data
         self._data[:3, 3] = v._data
@@ -182,7 +182,7 @@ class Transform(object):
 
     def __eq__(self, other):
         if type(other) == Transform:
-            return np.sum((self._data-other._data)**2) < utils._eps
+            return np.sum((self._data - other._data) ** 2) < utils.eps
         else:
             return NotImplemented
 
