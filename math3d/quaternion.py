@@ -354,7 +354,7 @@ class UnitQuaternion(object):
                 self._v = Vector(0, 0, 0)
             else:
                 tworinv = 1.0 / (2 * r)
-                self._s = util.flt((M[w, v] - M[v, w]) * tworinv)
+                self._s = utils.flt((M[w, v] - M[v, w]) * tworinv)
                 self._v[u] = 0.5 * r
                 self._v[v] = (M[u, v] + M[v, u]) * tworinv
                 self._v[w] = (M[w, u] + M[u, w]) * tworinv
@@ -394,7 +394,7 @@ class UnitQuaternion(object):
         """Normalize this quaternion. """
         n = self.norm
         if abs(n) < 1e-10:
-            self._s = util.flt(1)
+            self._s = utils.flt(1)
             self._v = Vector(0.0, 0.0, 0.0)
         else:
             ninv = 1.0 / n
