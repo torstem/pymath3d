@@ -46,6 +46,8 @@ class Line(object):
             raise Exception(
                 'Can not create Line object on given arguments: "{}"'
                 .format(kwargs))
+        # Create the unit direction vector
+        self._ud = self._d.normalized
 
     @property
     def point(self):
@@ -54,3 +56,13 @@ class Line(object):
     @property
     def direction(self):
         return m3d.Vector(self._d)
+
+    @property
+    def unit_direction(self):
+        return m3d.Vector(self._ud)
+
+
+    def projected_point(self, p):
+        """Return the projection of 'p' onto this line."""
+        p2p = (self._p - p)
+        return p + p2p - (self._ud * p2p) * self._ud
