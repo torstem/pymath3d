@@ -55,6 +55,8 @@ class Vector(object):
                 self._data = np.array((arg[0], arg[1], 0), dtype=utils.flt)
             elif type(arg) == Vector:
                 self._data = arg.array
+            elif hasattr(arg, "x") and hasattr(arg, "y") and hasattr(arg, "z"):
+                self._data = np.array([arg.x, arg.y, arg.z])
             else:
                 raise utils.Error(
                     ('__init__ : could not create vector on argument ' +
