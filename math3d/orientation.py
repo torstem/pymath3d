@@ -670,6 +670,35 @@ class Orientation(object):
         oaa.axis_angle = (axis, angle)
         return oaa
 
+    def get_dexp(self):
+        """The right trivialized differential of the matrix exponential. 
+           Described by equation (B.10) in the paper 
+           Iserles, Arieh, et al. "Lie-group methods." Acta numerica 9 (2000): 215-365.
+        """
+        def hat(v):
+            return np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+
+        x = self.rotation_vector
+        theta = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+        if np.isclose(theta, 0):
+            return np.eye(3)
+        c1,c2 = (1 - np.cos(theta)) / (theta**2), (theta - np.sin(theta)) / (theta**3)
+        return np.eye(3) + c1 * hat(x) + c2 * hat(x).dot(hat(x))
+
+    def get_dexpinv(self):
+        """The inverse of dexp. Described by equation (B.11) in the paper 
+           Iserles, Arieh, et al. "Lie-group methods." Acta numerica 9 (2000): 215-365.
+        """
+        def hat(v):
+            return np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+
+        x = self.rotation_vector
+        theta = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+        if np.isclose(theta, 0):
+            return np.eye(3)
+        cot = np.cos(theta/2.0) / np.sin(theta/2.0)
+        c = (theta * cot - 2.0) / (2 * theta**2)
+        return np.eye(3) - 1.0/2.0 * hat(x) - c * hat(x).dot(hat(x))
 
 def _test():
     o = Orientation()
